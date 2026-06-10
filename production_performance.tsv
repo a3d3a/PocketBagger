@@ -1,0 +1,88 @@
+Recall	Recall@Ki	Positive-Unlabeled Separation Area	Split Type	Sample Count	Tier	model
+0.897	0.947		Random	9125	Overall	PU Bagger
+0.897	0.95		Random	9125	Overall	PU Bagger
+0.892	0.95		Random	9125	Overall	PU Bagger
+0.897	0.948		Random	9125	Overall	PU Bagger
+0.891	0.946		Random	9125	Overall	PU Bagger
+0.902	0.877		Chain-Aware	9125	Overall	PU Bagger
+0.89	0.868		Chain-Aware	9124	Overall	PU Bagger
+0.897	0.869		Chain-Aware	9127	Overall	PU Bagger
+0.893	0.864		Chain-Aware	9125	Overall	PU Bagger
+0.894	0.87		Chain-Aware	9124	Overall	PU Bagger
+0.825	0.83		Protein-Aware	9124	Overall	PU Bagger
+0.821	0.803		Protein-Aware	9126	Overall	PU Bagger
+0.823	0.831		Protein-Aware	9124	Overall	PU Bagger
+0.74	0.764		Protein-Aware	9124	Overall	PU Bagger
+0.849	0.848		Protein-Aware	9127	Overall	PU Bagger
+0.748	0.752		Cluster-Aware	9125	Overall	PU Bagger
+0.849	0.869		Cluster-Aware	9125	Overall	PU Bagger
+0.753	0.784		Cluster-Aware	9125	Overall	PU Bagger
+0.871	0.868		Cluster-Aware	9125	Overall	PU Bagger
+0.798	0.752		Cluster-Aware	9125	Overall	PU Bagger
+0.485	0.151		Permutation Test	9125	Overall	PU Bagger
+0.102	0.066		Permutation Test	9124	Overall	PU Bagger
+0.461	0.203		Permutation Test	9127	Overall	PU Bagger
+0.554	0.174		Permutation Test	9125	Overall	PU Bagger
+0.56	0.224		Permutation Test	9124	Overall	PU Bagger
+0.907	0.909		Protein Kinase	4577	Overall	PU Bagger
+0.96	0.938		NHR	1288	Overall	PU Bagger
+0.894	0.838		GPCR	679	Overall	PU Bagger
+0.821	0.865		GrASP	28	Overall	PU Bagger
+0.897			Random	8745	Inliers	PU Bagger
+0.897			Random	8749	Inliers	PU Bagger
+0.892			Random	8815	Inliers	PU Bagger
+0.896			Random	8714	Inliers	PU Bagger
+0.891			Random	8739	Inliers	PU Bagger
+0.901			Chain-Aware	8770	Inliers	PU Bagger
+0.89			Chain-Aware	8718	Inliers	PU Bagger
+0.898			Chain-Aware	8782	Inliers	PU Bagger
+0.893			Chain-Aware	8683	Inliers	PU Bagger
+0.893			Chain-Aware	8750	Inliers	PU Bagger
+0.827			Protein-Aware	8790	Inliers	PU Bagger
+0.821			Protein-Aware	8857	Inliers	PU Bagger
+0.827			Protein-Aware	8852	Inliers	PU Bagger
+0.759			Protein-Aware	8418	Inliers	PU Bagger
+0.849			Protein-Aware	8680	Inliers	PU Bagger
+0.749			Cluster-Aware	8700	Inliers	PU Bagger
+0.851			Cluster-Aware	8539	Inliers	PU Bagger
+0.76			Cluster-Aware	8685	Inliers	PU Bagger
+0.87			Cluster-Aware	8962	Inliers	PU Bagger
+0.809			Cluster-Aware	8673	Inliers	PU Bagger
+0.491			Permutation Test	6609	Inliers	PU Bagger
+0.057			Permutation Test	6511	Inliers	PU Bagger
+0.423			Permutation Test	6506	Inliers	PU Bagger
+0.572			Permutation Test	6670	Inliers	PU Bagger
+0.607			Permutation Test	6328	Inliers	PU Bagger
+0.913			Protein Kinase	4527	Inliers	PU Bagger
+0.959			NHR	1236	Inliers	PU Bagger
+0.904			GPCR	596	Inliers	PU Bagger
+0.783			GrASP	23	Inliers	PU Bagger
+0.905			Random	380	Outliers	PU Bagger
+0.899			Random	376	Outliers	PU Bagger
+0.894			Random	310	Outliers	PU Bagger
+0.925			Random	411	Outliers	PU Bagger
+0.904			Random	386	Outliers	PU Bagger
+0.927			Chain-Aware	355	Outliers	PU Bagger
+0.879			Chain-Aware	406	Outliers	PU Bagger
+0.872			Chain-Aware	345	Outliers	PU Bagger
+0.889			Chain-Aware	442	Outliers	PU Bagger
+0.914			Chain-Aware	374	Outliers	PU Bagger
+0.772			Protein-Aware	334	Outliers	PU Bagger
+0.833			Protein-Aware	269	Outliers	PU Bagger
+0.702			Protein-Aware	272	Outliers	PU Bagger
+0.52			Protein-Aware	706	Outliers	PU Bagger
+0.861			Protein-Aware	447	Outliers	PU Bagger
+0.729			Cluster-Aware	425	Outliers	PU Bagger
+0.819			Cluster-Aware	586	Outliers	PU Bagger
+0.605			Cluster-Aware	440	Outliers	PU Bagger
+0.89			Cluster-Aware	163	Outliers	PU Bagger
+0.593			Cluster-Aware	452	Outliers	PU Bagger
+0.468			Permutation Test	2516	Outliers	PU Bagger
+0.214			Permutation Test	2613	Outliers	PU Bagger
+0.555			Permutation Test	2621	Outliers	PU Bagger
+0.504			Permutation Test	2455	Outliers	PU Bagger
+0.454			Permutation Test	2796	Outliers	PU Bagger
+0.38			Protein Kinase	50	Outliers	PU Bagger
+0.981			NHR	52	Outliers	PU Bagger
+0.819			GPCR	83	Outliers	PU Bagger
+1.0			GrASP	5	Outliers	PU Bagger

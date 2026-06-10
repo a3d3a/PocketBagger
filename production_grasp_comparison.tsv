@@ -1,0 +1,10 @@
+Recall	model	Tier
+0.8214285714285714	PocketBagger	Overall
+0.782608695652174	PocketBagger	Inliers
+1.0	PocketBagger	Outliers
+0.4642857142857143	GrASP (Site Mean)	Overall
+0.4782608695652174	GrASP (Site Mean)	Inliers
+0.4	GrASP (Site Mean)	Outliers
+0.6785714285714286	GrASP (Site Max)	Overall
+0.7391304347826086	GrASP (Site Max)	Inliers
+0.4	GrASP (Site Max)	Outliers
