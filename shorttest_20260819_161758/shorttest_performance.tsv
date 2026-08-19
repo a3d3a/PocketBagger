@@ -1,0 +1,28 @@
+Recall	Recall@Ki	Average Precision	Positive–Unlabeled Promotion Area Between Curves	Split Type	Sample Count	Tier	model
+0.834	0.984	0.166	0.555	Random	913	Overall	PU Bagging
+0.819	0.949	0.143	0.518	Chain-Aware	912	Overall	PU Bagging
+0.768	0.944	0.102	0.512	Protein-Aware	913	Overall	PU Bagging
+0.748	0.929	0.093	0.504	Cluster-Aware	913	Overall	PU Bagging
+0.482	0.624	0.009	-0.007	Permutation Test	912	Overall	PU Bagging
+0.906	0.971	0.391	0.621	Protein Kinase	458	Overall	PU Bagging
+0.984	0.992	0.411	0.633	NHR	129	Overall	PU Bagging
+0.941	0.978	0.319	0.541	GPCR	68	Overall	PU Bagging
+1.0	1.0	0.833	0.561	GrASP	3	Overall	PU Bagging
+0.829		0.162	0.542	Random	869	Inliers	PU Bagging
+0.821		0.148	0.505	Chain-Aware	882	Inliers	PU Bagging
+0.789		0.105	0.507	Protein-Aware	838	Inliers	PU Bagging
+0.745		0.095	0.499	Cluster-Aware	888	Inliers	PU Bagging
+0.486		0.008	-0.003	Permutation Test	747	Inliers	PU Bagging
+0.909		0.397	0.616	Protein Kinase	453	Inliers	PU Bagging
+0.983		0.409	0.626	NHR	116	Inliers	PU Bagging
+0.931		0.322	0.524	GPCR	58	Inliers	PU Bagging
+1.0		0.833	0.54	GrASP	3	Inliers	PU Bagging
+0.932		0.244	0.677	Random	44	Outliers	PU Bagging
+0.767		0.103	0.579	Chain-Aware	30	Outliers	PU Bagging
+0.533		0.067	0.443	Protein-Aware	75	Outliers	PU Bagging
+0.84		0.088	0.544	Cluster-Aware	25	Outliers	PU Bagging
+0.467		0.037	-0.014	Permutation Test	165	Outliers	PU Bagging
+0.6		0.239	0.434	Protein Kinase	5	Outliers	PU Bagging
+1.0		0.5	0.749	NHR	13	Outliers	PU Bagging
+1.0		0.384	0.621	GPCR	10	Outliers	PU Bagging
+0.0		0.0		GrASP	0	Outliers	PU Bagging
