@@ -177,7 +177,7 @@ drug_like_hets=pd.read_csv(drug_like_file,sep='\t')
 print('Number of unique drug-like HET codes:', drug_like_hets['HET'].nunique())
 
 # Convert drug-like HETs to a set for fast lookup
-drug_like_hets = set(drug_like_hets["HET"].tolist() + ['LIG']) #we add LIG as that is what is used in XCHEM and doesn't appear in the PDB
+drug_like_hets = set(drug_like_hets["HET"].tolist())
 
 # Function to check if any HET in a row is drug-like
 def contains_drug_like_het(het_string):
@@ -205,13 +205,6 @@ GPCRs=pd.read_csv('gpcr_list.txt',names=['uniprot_id']).uniprot_id.tolist()
 
 #load in the grasp test set and assign clusters
 grasp_test = pd.read_csv('grasp_set_predictions_20260302_123228.tsv',sep='\t')#.drop(columns=['cluster'])
-
-#read in xchem data, and label the pockets
-xchem = pd.read_csv('xchem_features.csv')
-xchem['occupied']=1
-xchem.loc[xchem.lig_codes.isna(),'occupied']=0
-xchem['label']=0
-xchem.loc[xchem.lig_codes.isna() == False, "label"] = xchem[xchem.lig_codes.isna() == False]["lig_codes"].apply(contains_drug_like_het)
 
 #import the dataset
 if development:
@@ -416,7 +409,6 @@ for splitter_name in split_dict.keys():
     else:
         group_label='pdbid_chain'
     
-    view_IDH1 = True
     for fold, (train_index, test_index) in tqdm(enumerate(splitter.split(df[feature_cols], df['label'], groups=df[group_label].values)), total=test_cvs):
         if fold == test_cvs:
             break
@@ -522,13 +514,6 @@ for splitter_name in split_dict.keys():
         #apply the isolation forest
         test['IF_SCORE']=outclf.decision_function(test[selected_feats])
         test['in_out']=np.where(test.IF_SCORE < 0, -1,1)
-        
-        #spit out a few results to punch into pymol for visualization
-        if len(test[(test.uniprot_id == 'O75874')]) > 0 and view_IDH1 == True:
-            print(test[(test.uniprot_id == 'O75874') & (test.label == 0) & (test.pred == 1) & (test.lig_codes.str.contains('-') == False) & (test.num_ligands == 1)].sample(frac=1).head(20).sort_values(by='prob')[['site_num','pdbid_chain','prob','pred','IF_SCORE','label','lig_codes']])
-            view_IDH1 = False
-        else:
-            print('No IDH1 structures with druggable residues in this test fold')
         
         print(test[(test.label == 0) & (test.pred == 1) & (test.lig_codes.str.contains('-') == False) & (test.num_ligands == 1)].sample(frac=1).head(20).sort_values(by='prob')[['site_num','pdbid_chain','prob','pred','IF_SCORE','label','lig_codes']])
         
@@ -879,133 +864,6 @@ best_score = hp_search.best_score_ #.cv_results_['mean_test_score'][hp_search.be
 best_params = hp_search.best_params_
 clf=hp_search.best_estimator_
 print('Best Score:', np.round(best_score,3), '| Best Params:', best_params)
-
-#let's predict on the xchem dataset
-xchem['Set']='XChem Unlabeled'
-xchem.loc[xchem.label == 1, 'Set']='XChem Positives'
-xchem['IF_SCORE'] = outclf.decision_function(xchem[selected_feats])
-xchem['in_out'] = np.where(xchem.IF_SCORE < 0, -1,1)
-xchem['prob'] = clf.predict_proba(xchem[selected_feats])[:,-1]
-xchem['pred'] = np.where(xchem['prob'] < 0.5, 0, 1)
-xchem['IF_SCORE'] = outclf.decision_function(xchem[selected_feats])
-xchem['in_out'] = np.where(xchem.IF_SCORE < 0, -1,1)
-xchem_in = xchem[xchem.in_out == 1]
-xchem_out = xchem[xchem.in_out == -1]
-
-xchem_recall_overall = []
-xchem_recall_in = []
-xchem_recall_out = []
-xchem_recall_kis =[]
-
-#compute recall@Ki per structure
-temp = (
-    xchem[['pdbid_chain', 'label', 'prob']]
-    .assign(_tie_order=xchem.index)
-    .sort_values(
-        ['pdbid_chain', 'prob', '_tie_order'],
-        ascending=[True, False, True]
-    )
-)
-
-temp['k'] = temp.groupby('pdbid_chain')['label'].transform('sum')
-temp = temp[temp['k'] > 0]
-
-topki = temp[
-    temp.groupby('pdbid_chain').cumcount() < temp['k']
-]
-
-recall_kis = (
-    topki.groupby('pdbid_chain')['label'].sum()
-    / temp.groupby('pdbid_chain')['k'].first()
-)
-
-xchem_recall_kis.append(recall_kis.mean())
-del temp
-del topki
-
-#append recall by tier
-for score_list, results in [(xchem_recall_overall,xchem),(xchem_recall_in,xchem_in),(xchem_recall_out,xchem_out)]:
-    try:
-        score_list.append(recall_score(results.label.values,results.pred.values))
-    except:
-        score_list.append(np.nan)
-
-#create a bar plot of the segmented results
-xchem_overall=pd.DataFrame({'Recall':xchem_recall_overall,'Recall@Ki':xchem_recall_kis,'Sample Count':len(xchem),'Tier':'Overall'})
-xchem_in=pd.DataFrame({'Recall':xchem_recall_in,'Sample Count':len(xchem_in),'Tier':f'Inliers'})
-xchem_out=pd.DataFrame({'Recall':xchem_recall_out,'Sample Count':len(xchem_out),'Tier':f'Outliers'})
-
-#tiers=pd.concat([oob_overall, oob_tier_in, oob_tier_out,overall,tier_in,tier_out]).reset_index(drop=True).round(3)
-xchem_results=pd.concat([xchem_overall,xchem_in,xchem_out]).reset_index(drop=True).round(3)
-xchem_results['model']=model_name
-xchem_results.to_csv(f'{foldername}/{experiment}_xchem_performance.tsv',sep='\t',index=None)
-xchem.to_csv(f'{foldername}/{experiment}_xchem_features_predictions.tsv',sep='\t',index=None)
-
-print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-print(f'XChem Prediction Results')
-print(xchem_results)
-
-#plot xchem results
-sns.barplot(xchem_results,x='Tier',y='Recall',capsize=0.05,err_kws={'linewidth': 2}, errorbar = 'sd')
-plt.xlabel('Segment')
-plt.title(f'True Positive Recall for XChem Structures (n = {len(xchem[xchem.label == 1])} pockets)')
-plt.ylim(0,1.05)
-plt.tight_layout()
-plt.savefig(f'{foldername}/{experiment}_xchem_recall.png', bbox_inches="tight")
-plt.cla()
-plt.clf()
-
-sns.histplot(pd.concat([train[train.label == 1],xchem[xchem.label == 1]],axis=0),x='IF_SCORE',hue='Set',bins=20,stat='percent',common_norm=False)
-plt.xlabel('Isolation Score Relative to Known Positives\n(Lower = More Anomalous)')
-plt.title('Anomaly Score Comparison')
-plt.tight_layout()
-plt.savefig(f'{foldername}/{experiment}_xchem_anomaly_comparison.png', bbox_inches="tight")
-plt.cla()
-plt.clf()
-
-#perform a bootstrap test of the xchem positve IF scores vs the training dataset to see if the means are different
-train_pos = train.loc[train.label == 1, "IF_SCORE"].dropna().to_numpy()
-xchem_pos = xchem.loc[xchem.label == 1, "IF_SCORE"].dropna().to_numpy()
-
-obs = train_pos.mean() - xchem_pos.mean()
-print(f'Observed Isolation Forest score effect size between Training Positives and XChem Positives: {obs:.4f}')
-
-# Generate bootstrap resamples
-print('Perform bootstrap comparison of the means of the training and XChem sets according to isolation forest scores')
-rng = np.random.default_rng(0)  # choose any fixed integer seed
-train_samples = rng.choice(train_pos, size=(n_boot, len(train_pos)), replace=True)
-xchem_samples = rng.choice(xchem_pos, size=(n_boot, len(xchem_pos)), replace=True)
-
-# Compute bootstrap means
-train_means = train_samples.mean(axis=1)
-xchem_means = xchem_samples.mean(axis=1)
-
-# Difference distribution
-diffs = train_means - xchem_means
-ci_low, ci_high = np.percentile(diffs, [2.5, 97.5])
-#p_value = 2 * min(
-#    (diffs <= 0).mean(),
-#    (diffs >= 0).mean()
-#)
-p_value = (diffs <= 0).mean()
-print(f'95% Confidence Interval: {ci_low:.4f}, {ci_high:.4f}')
-print("One-sided Bootstrap Mean Comparison p-value:", p_value)
-
-#plot the distribution
-sns.histplot(diffs, bins=20)
-plt.xlabel('Mean Difference of Anomaly Score Distributions')
-plt.title(f'Bootstrap Mean Comparison of Positive Pocket Anomaly Score Distributions\nbetween Training and XChem Datasets (n = {n_boot} samples)')
-plt.axvline(x=ci_low, color='gray', linestyle='dashed', linewidth=2)
-plt.axvline(x=ci_high, color='gray', linestyle='dashed', linewidth=2)
-# Add legend entry for the vertical line
-handles = [plt.Line2D([0], [0], color='gray', linestyle='dashed', lw=2)]
-labels = ["95% CI"]
-
-plt.legend(handles=handles, labels=labels, loc='upper left')#, fontsize=8)
-plt.tight_layout()
-plt.savefig(f'{foldername}/{experiment}_xchem_anomaly_bootstrap_comparison.png', bbox_inches="tight")
-plt.cla()
-plt.clf()
 
 print('\nCreating out of fold predictions, bootstrapped model uncertainty estimatates, and feature importance')
 sgkf.random_state = 42 #change the random state
