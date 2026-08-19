@@ -1,4 +1,0 @@
-Recall	Recall@Ki	Sample Count	Tier	model
-0.828	0.521	20050	Overall	PU Bagger
-0.824		18547	Inliers	PU Bagger
-0.953		1503	Outliers	PU Bagger
