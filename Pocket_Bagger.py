@@ -39,13 +39,14 @@ import gc
 
 #setup the argument parser
 parser = argparse.ArgumentParser(description="PocketBagger script")
+parser.add_argument("--input_file", type=str, required=False, default='20260217_surfnet_pockets_developmentset.tsv.gz', help="Controls development mode")
 parser.add_argument("--development", type=lambda x: x.lower() == "true", default=True, help="Controls development mode")
 parser.add_argument("--experiment", type=str, default='shorttest', help="Set experiment name")
 parser.add_argument("--isotrees", type=int, default=500, help="Set number of isolation forest trees")
 parser.add_argument("--bootstrap", type=int, default=10000, help="Set number of bootstap samples")
 parser.add_argument("--writemodels", type=lambda x: x.lower() == "true", default=False, help="Write out models")
 parser.add_argument("--writepredictions", type=lambda x: x.lower() == "true", default=False, help="Write out predictions")
-parser.add_argument("--runholdouttests", type=lambda x: x.lower() == "true", default=False, help="Run holdout tests")
+parser.add_argument("--runholdouttests", type=lambda x: x.lower() == "true", default=True, help="Run holdout tests")
 parser.add_argument("--date", type=str, default=rundate, required=False, help="DTG ran")
 parser.add_argument("--supervised_baseline", type=lambda x: x.lower() == "true", default=False, help="Use conventional supervised bagging baseline")
 
@@ -204,13 +205,10 @@ NHRs=pd.read_csv('nhr_list.txt',names=['uniprot_id']).uniprot_id.tolist()
 GPCRs=pd.read_csv('gpcr_list.txt',names=['uniprot_id']).uniprot_id.tolist()
 
 #load in the grasp test set and assign clusters
-grasp_test = pd.read_csv('grasp_set_predictions_20260302_123228.tsv',sep='\t')#.drop(columns=['cluster'])
+grasp_test = pd.read_csv('grasp_set_predictions_20260302_123228.tsv',sep='\t')
 
 #import the dataset
-if development:
-    input_file='20260217_surfnet_pockets_developmentset.tsv.gz'
-else:
-    input_file='20260217_surfnet_pockets.tsv.gz'
+input_file=args.input_file
 
 print(f'Input pocket data file: {input_file}')
 df=pd.read_csv(input_file,sep='\t',low_memory=False).sample(frac=1,random_state=0)
@@ -292,7 +290,7 @@ print(f'\nExperiment: {experiment}')
 decisiontree = DecisionTreeClassifier(criterion='log_loss', class_weight = class_weight, random_state=0)
 extratree = ExtraTreeClassifier(criterion='gini', class_weight = class_weight, random_state=0)
 clfmodel = BalancedBaggingClassifier(estimator= extratree if development else decisiontree,
-                                     n_estimators= 200,
+                                     n_estimators= num_workers if development else 200,
                                      replacement=False,
                                      bootstrap=bootstrap,
                                      sampler=sampler,
@@ -389,10 +387,6 @@ split_dict = {'Random': skf,
               'GPCR':gpcrs_ps,
               'GrASP':grasp_ps,
 }
-
-#if development:
-#    keys_to_keep = ['Cluster-Aware','Permutation Test','GrASP']
-#    split_dict = {k: split_dict[k] for k in keys_to_keep}
 
 grasp_recall_df = pd.DataFrame(columns=['Recall','model','Tier'])
 for splitter_name in split_dict.keys():
@@ -595,10 +589,11 @@ for splitter_name in split_dict.keys():
             grasp_test.loc[grasp_test.in_out == -1, 'Set']='GrASP Test Holdout Outliers'
             temp_df = pd.concat([train[train.label == 1][selected_feats +['Set']], grasp_test[selected_feats + ['Set']]])
             temp_df[selected_feats] = scaler.transform(temp_df[selected_feats])
+            os.makedirs(f'{foldername}/grasp_distributions', exist_ok=True)
             for feat in selected_feats:
                 sns.histplot(temp_df,x=feat,hue='Set',stat='percent',common_norm=False)
                 plt.tight_layout()
-                plt.savefig(f'{foldername}/{experiment}_{feat}_grasp.png',bbox_inches='tight')
+                plt.savefig(f'{foldername}/grasp_distributions/{experiment}_{feat}_grasp.png',bbox_inches='tight')
                 plt.cla()
                 plt.clf()
             
