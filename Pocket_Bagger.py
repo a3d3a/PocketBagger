@@ -39,7 +39,7 @@ import gc
 
 #setup the argument parser
 parser = argparse.ArgumentParser(description="PocketBagger script")
-parser.add_argument("--input_file", type=str, required=False, default='20260217_surfnet_pockets_developmentset.tsv.gz', help="Controls development mode")
+parser.add_argument("--input_file", type=str, required=False, default='20260217_surfnet_pockets_developmentset.tsv.gz', help="name of input file")
 parser.add_argument("--development", type=lambda x: x.lower() == "true", default=True, help="Controls development mode")
 parser.add_argument("--experiment", type=str, default='shorttest', help="Set experiment name")
 parser.add_argument("--isotrees", type=int, default=500, help="Set number of isolation forest trees")
@@ -289,7 +289,7 @@ print(f'\nExperiment: {experiment}')
 #setup the classifier
 decisiontree = DecisionTreeClassifier(criterion='log_loss', class_weight = class_weight, random_state=0)
 extratree = ExtraTreeClassifier(criterion='gini', class_weight = class_weight, random_state=0)
-clfmodel = BalancedBaggingClassifier(estimator= extratree if development else decisiontree,
+clfmodel = BalancedBaggingClassifier(estimator= decisiontree if development else decisiontree,
                                      n_estimators= num_workers if development else 200,
                                      replacement=False,
                                      bootstrap=bootstrap,
@@ -298,30 +298,32 @@ clfmodel = BalancedBaggingClassifier(estimator= extratree if development else de
                                      random_state=0)
 
 #overfit a model to set a ceiling on the max depth we'll explore
-if development:
-    upper_depth_limit = 100
+#if development:
+#    upper_depth_limit = 100
+#else:
+print('Fitting a model to overfit')
+clf=clone(clfmodel)
+clf.set_params(estimator__max_features = 'sqrt')
+clf.fit(df[feature_cols],df['label'])
+
+#double check sample count in the first bag is what's intended.
+if args.supervised_baseline:
+    first_bag_indices = clf.estimators_samples_[0]
+    print(f'First baseline bag sample count for verification: {len(first_bag_indices)}')
+    print(f'First baseline unique sample count for verification: {len(np.unique(first_bag_indices))}')
+    del first_bag_indices
 else:
-    print('Fitting a model to overfit')
-    clf=clone(clfmodel)
-    clf.set_params(estimator__max_features = 'sqrt')
-    clf.fit(df[feature_cols],df['label'])
+    sampler0 = clf.estimators_[0].named_steps['sampler']
+    print(f'First PU bag sample count after undersampling for verification: {len(sampler0.sample_indices_)}')
+    del sampler0
 
-    #double check sample count in the first bag is what's intended.
-    if args.supervised_baseline:
-        first_bag_indices = clf.estimators_samples_[0]
-        print(f'First baseline bag sample count for verification: {len(first_bag_indices)}')
-        print(f'First baseline unique sample count for verification: {len(np.unique(first_bag_indices))}')
-        del first_bag_indices
-    else:
-        sampler0 = clf.estimators_[0].named_steps['sampler']
-        print(f'First PU bag sample count after undersampling for verification: {len(sampler0.sample_indices_)}')
-        del sampler0
-
-    depths = [tree.named_steps['classifier'].get_depth() for tree in clf.estimators_] #BalancedBaggingClassifier with DecisionTree or ExtraTree Classifier
-    upper_depth_limit = max(depths)
-    del clf
-    del depths
-    gc.collect()
+depths = [tree.named_steps['classifier'].get_depth() for tree in clf.estimators_] #BalancedBaggingClassifier with DecisionTree or ExtraTree Classifier
+print(np.percentile(depths,[1,5,10]))
+exit()
+upper_depth_limit = max(depths)
+del clf
+del depths
+gc.collect()
 
 #set the search space for depth
 print(f'Setting the maximum tree depth to {upper_depth_limit}')
