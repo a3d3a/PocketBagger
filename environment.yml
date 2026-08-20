@@ -1,0 +1,19 @@
+name: pocketbagger
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - scipy
+  - mmseqs2
+  - numpy
+  - tqdm
+  - matplotlib
+  - python
+  - scikit-learn-intelex
+  - scikit-optimize
+  - imbalanced-learn
+  - seaborn
+  - pandas
+  - wordcloud
+  - rdkit
+  - scikit-learn
