@@ -318,8 +318,6 @@ else:
     del sampler0
 
 depths = [tree.named_steps['classifier'].get_depth() for tree in clf.estimators_] #BalancedBaggingClassifier with DecisionTree or ExtraTree Classifier
-print(np.percentile(depths,[1,5,10]))
-exit()
 upper_depth_limit = max(depths)
 del clf
 del depths
